@@ -5,51 +5,60 @@
     <title>Pixel Image Element</title>
   </head>
   <body>
-    <pixel-img src="switch.png" style="width: 400px; height: 200px;"></pixel-img>
+    <img src="switch.png" style="width: 200px;"></pixel-img>
     <script>
-        class PixelImg extends HTMLElement {
-            constructor() {
+        class PixelImg {
+            constructor(img) {
                 // TODO: hidpi displays
-                super();
+                // TODO: lint
+                this.img = img;
+            }
 
-                this.style.display = "block";
+            init() {
+                // Set up div wrapper
+                this.div = document.createElement('div');
+                this.div.style.display = 'inline-block';
+                this.div.style.fontSize = '0';
+                this.div.style.position = "relative";
+                this.div.className = "img-pixelated-polyfill-wrap";
+                wrap(this.img, this.div);
 
-                let shadow = this.attachShadow({ mode: 'open' });
+                // Set up canvas
                 this.canvas = document.createElement('canvas');
                 this.canvas.style.display = "block";
-
-                this.canvas.style.border = "solid red 1px";
+                this.canvas.style.width = "100%";
+                this.canvas.style.height = "100%";
+                this.canvas.style.position = "absolute";
+                this.canvas.style.top = "0";
+                this.canvas.style.left = "0";
+                this.canvas.style.pointerEvents = "none";
 
                 this.ctx = this.canvas.getContext("2d");
 
-                console.log(this.getAttribute("src"));
+                this.div.appendChild(this.canvas);
 
-                this.img = document.createElement('img');
-                this.img.onload = () => {
-                    this.updateSize();
-                    this.draw();
-                };
+                // Draw
 
-                this.updateSrc();
-                this.updateSize();
+                this.updateCanvasSize();
 
-                shadow.appendChild(this.canvas);
-                shadow.appendChild(this.img);
+                // Hide image, while still allowing it to be clicked on
+
+                this.img.style.opacity = "0";
+
+                // Listen for size changes
+
+                new ResizeObserver(this.updateCanvasSize.bind(this)).observe(this.div);
             }
 
-            updateSrc() {
-                this.img.src = this.getAttribute("src");
-            }
-
-            updateSize() {
-                if (this.img.complete) {
-                    this.setSize(this.clientWidth, this.clientHeight);
+            updateCanvasSize() {
+                const w = this.div.clientWidth;
+                const h = this.div.clientHeight;
+                if (!this.lastSize || this.lastSize.w !== w || this.lastSize.h !== h) {
+                    this.canvas.width = w;
+                    this.canvas.height = h;
+                    this.lastSize = { w, h }
                 }
-            }
-
-            setSize(w, h) {
-                this.canvas.width = w;
-                this.canvas.height = h;
+                this.draw();
             }
 
             draw() {
@@ -57,10 +66,25 @@
                 this.ctx.imageSmoothingEnabled = false;
                 this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height);
                 this.ctx.restore();
-                console.log("draw");
             }
         }
         customElements.define('pixel-img', PixelImg);
+
+        function wrap(el, wrapper) {
+            el.parentNode.insertBefore(wrapper, el);
+            wrapper.appendChild(el);
+        }
+
+        document.querySelectorAll('img').forEach( img => {
+            const pixelImg = new PixelImg(img);
+            if (img.complete) {
+                pixelImg.init();
+            } else {
+                img.onload = () => {
+                    pixelImg.init();
+                };
+            }
+        });
     </script>
   </body>
 </html>
