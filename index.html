@@ -68,23 +68,33 @@
                 this.ctx.restore();
             }
         }
-        customElements.define('pixel-img', PixelImg);
 
         function wrap(el, wrapper) {
             el.parentNode.insertBefore(wrapper, el);
             wrapper.appendChild(el);
         }
 
-        document.querySelectorAll('img').forEach( img => {
-            const pixelImg = new PixelImg(img);
-            if (img.complete) {
-                pixelImg.init();
-            } else {
-                img.onload = () => {
-                    pixelImg.init();
-                };
-            }
-        });
+        PixelImg.pixelize = (elements) => {
+            elements.forEach( img => {
+                if (img instanceof HTMLImageElement) {
+                    img.style.imageRendering = "pixelated";
+                    if (!CSS.supports("image-rendering", "pixelated")) {
+                        const pixelImg = new PixelImg(img);
+                        if (img.complete) {
+                            pixelImg.init();
+                        } else {
+                            img.onload = () => {
+                                pixelImg.init();
+                            };
+                        }
+                    }
+                }
+            });
+        };
+
+    </script>
+    <script>
+        PixelImg.pixelize(document.querySelectorAll('img'));
     </script>
   </body>
 </html>
