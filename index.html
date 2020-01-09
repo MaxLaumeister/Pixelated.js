@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Pixel Image Element</title>
+  </head>
+  <body>
+    <pixel-img src="switch.png" style="width: 400px; height: 200px;"></pixel-img>
+    <script>
+        class PixelImg extends HTMLElement {
+            constructor() {
+                // TODO: hidpi displays
+                super();
+
+                this.style.display = "block";
+
+                let shadow = this.attachShadow({ mode: 'open' });
+                this.canvas = document.createElement('canvas');
+                this.canvas.style.display = "block";
+
+                this.canvas.style.border = "solid red 1px";
+
+                this.ctx = this.canvas.getContext("2d");
+
+                console.log(this.getAttribute("src"));
+
+                this.img = document.createElement('img');
+                this.img.onload = () => {
+                    this.updateSize();
+                    this.draw();
+                };
+
+                this.updateSrc();
+                this.updateSize();
+
+                shadow.appendChild(this.canvas);
+                shadow.appendChild(this.img);
+            }
+
+            updateSrc() {
+                this.img.src = this.getAttribute("src");
+            }
+
+            updateSize() {
+                if (this.img.complete) {
+                    this.setSize(this.clientWidth, this.clientHeight);
+                }
+            }
+
+            setSize(w, h) {
+                this.canvas.width = w;
+                this.canvas.height = h;
+            }
+
+            draw() {
+                this.ctx.save();
+                this.ctx.imageSmoothingEnabled = false;
+                this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.restore();
+                console.log("draw");
+            }
+        }
+        customElements.define('pixel-img', PixelImg);
+    </script>
+  </body>
+</html>
