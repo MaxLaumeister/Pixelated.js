@@ -32,6 +32,7 @@
             // Then, polyfill time
 
             if (!CSS.supports("image-rendering", "pixelated")) {
+                this.img.crossOrigin = "anonymous";
                 // Lock dimensions
                 if (!this.img.getAttribute("width") && !this.img.getAttribute("height")) {
                     this.img.width = this.img.naturalWidth;
