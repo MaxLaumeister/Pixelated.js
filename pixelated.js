@@ -8,37 +8,54 @@
  *  @license http://opensource.org/licenses/MIT MIT License
  *  @copyright 2020 Maximillian Laumeister
  */
-(function() {
-    class PixelatedPolyfill {
-        constructor(img) {
-            // TODO: lint
-            this.img = img;
-        }
+    class PixelatedPolyfill extends HTMLElement {
+        constructor() {
+            super();
 
-        init() {
+            // Create img tag
+
+            this.img = document.createElement("img");
+            this.img.style.imageRendering = "pixelated";
+            copyAttributes(this, this.img);
+            if (this.style.width) {
+                this.style.removeProperty("width");
+            }
+            if (this.style.height) {
+                this.style.removeProperty("height");
+            }
+            this.img.src = this.getAttribute("src");
+            this.img.onload = () => {
+                this.init();
+            };
+
             // Set up div wrappers
 
-            const outerDiv = document.createElement('div');
-            outerDiv.attachShadow({ mode: 'open' });
-            outerDiv.className = "pixelated-polyfill";
+            this.attachShadow({ mode: 'open' });
 
             this.div = document.createElement('div');
             this.div.style.display = "inline-block";
             this.div.style.position = "relative";
 
-            // Copy important attributes
+            // Set up styles
 
-            outerDiv.id = this.img.id;
-            outerDiv.className = this.img.className;
-            outerDiv.style = this.img.style;
+            const styles = `
+                :host {
+                    display: inline-block;
+                    font-size: 0;
+                }
+            `;
+            const styleSheet = document.createElement("style");
+            styleSheet.type = "text/css";
+            styleSheet.textContent = styles;
+            this.shadowRoot.appendChild(styleSheet);
 
             // Add to DOM
 
-            this.img.parentNode.insertBefore(outerDiv, this.img);
-            outerDiv.shadowRoot.appendChild(this.img);
-            
-            this.img.parentNode.insertBefore(this.div, this.img);
             this.div.appendChild(this.img);
+            this.shadowRoot.appendChild(this.div);
+        }
+
+        init() {
             
             // Polyfill time
 
@@ -89,7 +106,12 @@
         }
     }
 
-    PixelatedPolyfill.initialized = false;
+    function copyAttributes(sourceEl, destEl) {
+        for (let i = 0; i < sourceEl.attributes.length; i++) {
+            const attribute = sourceEl.attributes[i];
+            destEl.setAttribute(attribute.name, attribute.value);
+        }
+    }
 
     PixelatedPolyfill.pixelate = (elements) => {
         if (typeof elements[Symbol.iterator] !== 'function') {
@@ -102,13 +124,6 @@
 
             PixelatedPolyfill.initialized = true;
 
-            const styles = `
-                .pixelated-polyfill {
-                    display: inline-block;
-                    font-size: 0;
-                }
-            `;
-
             const firstStyleTag = document.querySelector("style, link[type='text/css']");
 
             const styleSheet = document.createElement("style");
@@ -120,22 +135,6 @@
                 document.head.appendChild(styleSheet);
             }
         }
-
-        // Set up elements
-        elements.forEach( img => {
-            if (img instanceof HTMLImageElement) {
-                img.style.imageRendering = "pixelated";
-                const pixelImg = new PixelatedPolyfill(img);
-                if (img.complete) {
-                    pixelImg.init();
-                } else {
-                    img.onload = () => {
-                        pixelImg.init();
-                    };
-                }
-            }
-        });
     };
 
-    window.PixelatedPolyfill = PixelatedPolyfill;
-})();
+    customElements.define('img-pixelated', PixelatedPolyfill);
