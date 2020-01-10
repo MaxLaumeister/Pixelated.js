@@ -1,7 +1,6 @@
 (function() {
     class PixelatedPolyfill {
         constructor(img) {
-            // TODO: hidpi displays
             // TODO: lint
             this.img = img;
         }
@@ -53,8 +52,9 @@
 
         updateCanvas() {
             // Update canvas size
-            const w = this.div.clientWidth;
-            const h = this.div.clientHeight;
+            const dpr = window.devicePixelRatio || 1;
+            const w = this.div.clientWidth * dpr;
+            const h = this.div.clientHeight * dpr;
             if (!this.lastSize || this.lastSize.w !== w || this.lastSize.h !== h) {
                 this.canvas.width = w;
                 this.canvas.height = h;

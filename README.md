@@ -35,6 +35,7 @@ You can use this same `pixelated-polyfill` class to add borders, change opacity,
 * Designed for all modern browsers (not IE). Tested in Chrome, Firefox, and Edge.
 * Responds gracefully to resize/reflow events, like a real `img` tag
 * Preserves the `img` tag's "right-click, view image" and "save as" functionality
+* Stays crisp on hidpi displays
 * Exclusive browser activism feature - seeing blurry pixel art gently reminds IE users that they need to start using a browser that doesn't butcher my code
 
 ## Under the Hood
