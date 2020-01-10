@@ -6,33 +6,46 @@ It provides functionality similar to the `image-rendering: pixelated` CSS proper
 
 `Pixelated.js` is also a more consistent alternative to using `image-rendering: crisp-edges`, because it guarantees that images will be scaled using the nearest neighbor algorithm. [According to the spec, the scaling algorithm for `crisp-edges` is undefined](https://stackoverflow.com/a/20678910/2234742), so `Pixelated.js` makes sure your images look the same across all modern browsers.
 
+## Live Demo
+
+Click on the screenshot to see a [live demo](https://www.maxlaumeister.com/pixelated-js/).
+
+<a href="https://www.maxlaumeister.com/pixelated-js/"><img alt="Pixelated.js Screenshot" src="/screenshot.png?raw=true" width="635" height="175" title="Click for Live Demo"></a>
+
 ## Usage
 
-Get started with the following code at the end of your `body`:
+Start with one or more scaled-up `img` tags that you'd like to apply nearest-neighbor scaling to:
 
-    <script src="pixelated.min.js"></script>
-    <script>
+```html
+<img src="switch.png" style="width: 300px;">
+```
+
+Then, add the following code to the end of your `body`:
+
+```html
+<script src="pixelated.min.js"></script>
+<script>
     const elements = document.querySelectorAll('img');
     PixelatedPolyfill.pixelate(elements);
-    </script>
+</script>
+```
 
-`Pixelated.js` wraps your `img` element in a `div` with class `pixelated-wrap`. By default, the div is `inline-block`, which gives it similar behavior to an `img` tag.
+That's it!
 
-To make your images `display: block`, use the following style:
+`Pixelated.js` works by wrapping each of your `img` elements in a `div` with class `pixelated-wrap`. By default, the div is `inline-block`, which gives the wrapper similar behavior to a default-styled `img` tag.
 
-    .pixelated-polyfill {
-        display: block;
-    }
+For custom styling (for example to center your images), style the `.pixelated-polyfill` wrapper in your CSS:
 
-You can use this same `pixelated-polyfill` class to add borders, change opacity, etc.
-
-## Example
-
-(TODO: Screenshots and link to live demo here)
+```css
+.pixelated-polyfill {
+    display: block;
+    text-align: center;
+}
+```
 
 ## Features
 
-* Designed for all modern browsers (not IE). Tested in Chrome, Firefox, and Edge.
+* Designed for all modern browsers (but not IE). Tested in Chrome, Firefox, and Edge.
 * Responds gracefully to resize/reflow events, like a real `img` tag
 * Preserves the `img` tag's "right-click, view image" and "save as" functionality
 * Stays crisp on hidpi displays
@@ -40,4 +53,8 @@ You can use this same `pixelated-polyfill` class to add borders, change opacity,
 
 ## Under the Hood
 
-To render an image, `Pixelated.js` wraps the `img` tag in a `div`, then renders the image to a `canvas` element on top of it. In browsers that support `image-rendering: pixelated` natively, this polyfill still wraps the image in a `div` to ensure consistent CSS behavior, however it lets the native `img` tag show instead of using canvas rendering.
+Here's how `Pixelated.js` works under the hood.
+
+To render an image in a browser that does not support `image-rendering: pixelated`, `Pixelated.js` renders the image to a `canvas` element of the same size, then hides the original image. In browsers that support `image-rendering: pixelated` natively, this polyfill adds that property to the `img` tag so that the browser scales natively.
+
+In either case, the `img` is wrapped in a `div` to ensure consistent CSS behavior.
