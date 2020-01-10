@@ -1,3 +1,13 @@
+/**
+ *  Pixelated.js
+ * 
+ *  A polyfill for `image-rendering: pixelated`.
+ * 
+ *  @author Maximillian Laumeister
+ *  @link https://github.com/MaxLaumeister/pixelated-polyfill
+ *  @license http://opensource.org/licenses/MIT MIT License
+ *  @copyright 2020 Maximillian Laumeister
+ */
 (function() {
     class PixelatedPolyfill {
         constructor(img) {
@@ -58,7 +68,7 @@
             if (!this.lastSize || this.lastSize.w !== w || this.lastSize.h !== h) {
                 this.canvas.width = w;
                 this.canvas.height = h;
-                this.lastSize = { w, h }
+                this.lastSize = { w, h };
             }
             // Redraw
             this.ctx.save();

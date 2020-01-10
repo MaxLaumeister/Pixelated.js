@@ -4,7 +4,7 @@
 
 It provides functionality similar to the `image-rendering: pixelated` CSS property, which is currently supported by webkit browsers (Chrome, Safari, Opera), but not by Edge or Firefox.
 
-`Pixelated.js` is also a more consistent alternative to using `image-rendering: crisp-edges`, because it guarantees that images will always be scaled using the nearest neighbor algorithm. [According to the spec, the scaling algorithm for `crisp-edges` is undefined](https://stackoverflow.com/a/20678910/2234742), so `Pixelated.js` makes sure your images look the same across all modern browsers.
+`Pixelated.js` is also a more consistent alternative to using `image-rendering: crisp-edges`, because it guarantees that images will be scaled using the nearest neighbor algorithm. [According to the spec, the scaling algorithm for `crisp-edges` is undefined](https://stackoverflow.com/a/20678910/2234742), so `Pixelated.js` makes sure your images look the same across all modern browsers.
 
 ## Usage
 
@@ -28,7 +28,7 @@ You can use this same `pixelated-polyfill` class to add borders, change opacity,
 
 ## Example
 
-(TODO: Screenshots here)
+(TODO: Screenshots and link to live demo here)
 
 ## Features
 
