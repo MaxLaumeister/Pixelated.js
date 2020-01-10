@@ -1,7 +1,8 @@
 /**
  *  Pixelated.js
  * 
- *  A polyfill for `image-rendering: pixelated`.
+ *  Automatically scale img tags using nearest-neighbor.
+ *  Just add the "pixelated" attribute to your img.
  * 
  *  @author Maximillian Laumeister
  *  @link https://github.com/MaxLaumeister/pixelated-polyfill
@@ -9,133 +10,86 @@
  *  @copyright 2020 Maximillian Laumeister
  */
 (function() {
-    class PixelatedPolyfill {
+    class PixelatedImage {
         constructor(img) {
-            // TODO: lint
             this.img = img;
+            this.originalImg = img.cloneNode(true);
+            if (img.complete) {
+                this.init();
+            } else {
+                img.onload = () => {
+                    img.onload = null;
+                    this.init();
+                };
+            }
         }
 
         init() {
-            // Set up div wrappers
-
-            const outerDiv = document.createElement('div');
-            outerDiv.attachShadow({ mode: 'open' });
-            outerDiv.className = "pixelated-polyfill";
-
-            this.div = document.createElement('div');
-            this.div.style.display = "inline-block";
-            this.div.style.position = "relative";
-
-            // Copy important attributes
-
-            outerDiv.id = this.img.id;
-            outerDiv.className = this.img.className;
-            outerDiv.style = this.img.style;
-
-            // Add to DOM
-
-            this.img.parentNode.insertBefore(outerDiv, this.img);
-            outerDiv.shadowRoot.appendChild(this.img);
+            // First try native
             
-            this.img.parentNode.insertBefore(this.div, this.img);
-            this.div.appendChild(this.img);
+            this.img.style.imageRendering = "pixelated";
             
-            // Polyfill time
+            // Then, polyfill time
 
             if (!CSS.supports("image-rendering", "pixelated")) {
+                // Lock dimensions
+                if (!this.img.getAttribute("width") && !this.img.getAttribute("height")) {
+                    this.img.width = this.img.naturalWidth;
+                    this.img.height = this.img.naturalHeight;
+                }
                 // Set up canvas
                 this.canvas = document.createElement('canvas');
-                this.canvas.style.display = "block";
-                this.canvas.style.width = "100%";
-                this.canvas.style.height = "100%";
-                this.canvas.style.position = "absolute";
-                this.canvas.style.top = "0";
-                this.canvas.style.left = "0";
-                this.canvas.style.pointerEvents = "none";
-
                 this.ctx = this.canvas.getContext("2d");
-
-                this.div.appendChild(this.canvas);
 
                 // Size the canvas and draw
 
                 this.updateCanvas();
 
-                // Hide image, while still allowing it to be clicked on
-
-                this.img.style.opacity = "0";
-
                 // Listen for size changes
 
-                new ResizeObserver(this.updateCanvas.bind(this)).observe(this.div);
+                new ResizeObserver(this.updateCanvas.bind(this)).observe(this.img);
             }
         }
 
         updateCanvas() {
-            // Update canvas size
-            const dpr = window.devicePixelRatio || 1;
-            const w = this.div.clientWidth * dpr;
-            const h = this.div.clientHeight * dpr;
-            if (!this.lastSize || this.lastSize.w !== w || this.lastSize.h !== h) {
+            // Debounce
+            if (!this.canvasDebounceTimeout) {
+                // Update canvas size
+                const dpr = window.devicePixelRatio || 1;
+                const w = this.img.clientWidth * dpr;
+                const h = this.img.clientHeight * dpr;
                 this.canvas.width = w;
                 this.canvas.height = h;
-                this.lastSize = { w, h };
+                // Redraw
+                this.ctx.save();
+                this.ctx.imageSmoothingEnabled = false;
+                this.ctx.drawImage(this.originalImg, 0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.restore();
+                // Draw canvas to img element
+                this.img.src = this.canvas.toDataURL();
+                // Set debounce
+                this.canvasDebounceTimeout = setTimeout(() => {
+                    this.canvasDebounceTimeout = null;
+                }, 500);
+                // Set final timeout
+                clearTimeout(this.canvasFinalTimeout);
+                this.canvasFinalTimeout = setTimeout(this.updateCanvas.bind(this), 500);
             }
-            // Redraw
-            this.ctx.save();
-            this.ctx.imageSmoothingEnabled = false;
-            this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height);
-            this.ctx.restore();
         }
     }
 
-    PixelatedPolyfill.initialized = false;
+    function processImage(img) {
+        img.style.imageRendering = "pixelated";
+        new PixelatedImage(img);
+    }
 
-    PixelatedPolyfill.pixelate = (elements) => {
-        if (typeof elements[Symbol.iterator] !== 'function') {
-            // If the user passed in a single element, convert it to an array to normalize the code
-            elements = [elements];
-        }
-        
-        if (!PixelatedPolyfill.initialized) {
-            // Set up CSS - insert styles before all other styles in the page, so the user can override it
-
-            PixelatedPolyfill.initialized = true;
-
-            const styles = `
-                .pixelated-polyfill {
-                    display: inline-block;
-                    font-size: 0;
-                }
-            `;
-
-            const firstStyleTag = document.querySelector("style, link[type='text/css']");
-
-            const styleSheet = document.createElement("style");
-            styleSheet.type = "text/css";
-            styleSheet.textContent = styles;
-            if (firstStyleTag) {
-                firstStyleTag.parentNode.insertBefore(styleSheet, firstStyleTag);
-            } else {
-                document.head.appendChild(styleSheet);
-            }
-        }
-
-        // Set up elements
-        elements.forEach( img => {
+    document.addEventListener("DOMContentLoaded", function() {
+        // Process existing images
+        const imgs = document.querySelectorAll("img[pixelated]");
+        imgs.forEach( img => {
             if (img instanceof HTMLImageElement) {
-                img.style.imageRendering = "pixelated";
-                const pixelImg = new PixelatedPolyfill(img);
-                if (img.complete) {
-                    pixelImg.init();
-                } else {
-                    img.onload = () => {
-                        pixelImg.init();
-                    };
-                }
+                processImage(img);
             }
         });
-    };
-
-    window.PixelatedPolyfill = PixelatedPolyfill;
+    });
 })();

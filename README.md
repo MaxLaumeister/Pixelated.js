@@ -14,47 +14,29 @@ Click on the screenshot to see a [live demo](https://www.maxlaumeister.com/pixel
 
 ## Usage
 
-Start with one or more scaled-up `img` tags that you'd like to apply nearest-neighbor scaling to:
+Start with one or more scaled-up `img` tags that you'd like to apply nearest-neighbor scaling to. Add the `pixelated` attribute:
 
 ```html
-<img src="switch.png" style="width: 300px;">
+<img src="switch.png" style="width: 300px;" pixelated>
 ```
 
-Then, add the following code to the end of your `body`:
+Then, include `pixelated.js` anywhere in your document:
 
 ```html
 <script src="pixelated.min.js"></script>
-<script>
-    const elements = document.querySelectorAll('img');
-    PixelatedPolyfill.pixelate(elements);
-</script>
 ```
 
 That's it!
 
-`Pixelated.js` works by wrapping each of your `img` elements in a `div` with class `pixelated-wrap`. By default, the div is `inline-block`, which gives the wrapper similar behavior to a default-styled `img` tag.
-
-For custom styling (for example to center your images), style the `.pixelated-polyfill` wrapper in your CSS:
-
-```css
-.pixelated-polyfill {
-    display: block;
-    text-align: center;
-}
-```
+`Pixelated.js` adds the `image-rendering: pixelated` property if the browser supports it, and if not, `Pixelated.js` polyfills it by automatically replacing the `src` of your image with a dynamically-generated scaled-up image.
 
 ## Features
 
 * Designed for all modern browsers (but not IE). Tested in Chrome, Firefox, and Edge.
 * Responds gracefully to resize/reflow events, like a real `img` tag
-* Preserves the `img` tag's "right-click, view image" and "save as" functionality
 * Stays crisp on hidpi displays
 * Exclusive browser activism feature - seeing blurry pixel art gently reminds IE users that they need to start using a browser that doesn't butcher my code
 
-## Under the Hood
+## Limitations
 
-Here's how `Pixelated.js` works under the hood.
-
-To render an image in a browser that does not support `image-rendering: pixelated`, `Pixelated.js` renders the image to a `canvas` element of the same size, then hides the original image. In browsers that support `image-rendering: pixelated` natively, this polyfill adds that property to the `img` tag so that the browser scales natively.
-
-In either case, the `img` is wrapped in a `div` to ensure consistent CSS behavior.
+* Due to the way `Pixelated.js` uses `canvas`, it only works with images loaded from the same origin. This means that it is unable to polyfill hotlinked images from other domains. As a side note, this also means that the included `demo.html` file will only run properly if loaded from a real web server, not if loaded directly from the filesystem.
