@@ -6,9 +6,10 @@
   </head>
   <body>
     <img src="switch.png" style="width: 200px;"></pixel-img>
-    <script src="../imgRenderingPixelatedPolyfill.js"></script>
+    <script src="../pixelated.js"></script>
     <script>
-        PixelImg.pixelize(document.querySelectorAll('img'));
+        const elements = document.querySelector('img');
+        PixelatedPolyfill.pixelate(elements);
     </script>
   </body>
 </html>
