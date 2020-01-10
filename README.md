@@ -10,7 +10,7 @@ It provides functionality similar to the `image-rendering: pixelated` CSS proper
 
 Click on the screenshot to see a [live demo](https://www.maxlaumeister.com/pixelated-js/).
 
-<a href="https://www.maxlaumeister.com/pixelated-js/"><img alt="Pixelated.js Screenshot" src="/screenshot.png?raw=true" width="635" height="175" title="Click for Live Demo"></a>
+<a href="https://www.maxlaumeister.com/pixelated-js/"><img alt="Pixelated.js Screenshot" src="/screenshot.png?raw=true" width="635" title="Click for Live Demo"></a>
 
 ## Usage
 
