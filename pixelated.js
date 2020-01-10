@@ -19,15 +19,26 @@
             // Set up div wrappers
 
             const outerDiv = document.createElement('div');
+            outerDiv.attachShadow({ mode: 'open' });
             outerDiv.className = "pixelated-polyfill";
 
             this.div = document.createElement('div');
-            this.div.className = "pixelated-polyfill-inner";
+            this.div.style.display = "inline-block";
+            this.div.style.position = "relative";
+
+            // Copy important attributes
+
+            outerDiv.id = this.img.id;
+            outerDiv.className = this.img.className;
+            outerDiv.style = this.img.style;
 
             // Add to DOM
 
-            wrap(this.img, this.div);
-            wrap(this.div, outerDiv);
+            this.img.parentNode.insertBefore(outerDiv, this.img);
+            outerDiv.shadowRoot.appendChild(this.img);
+            
+            this.img.parentNode.insertBefore(this.div, this.img);
+            this.div.appendChild(this.img);
             
             // Polyfill time
 
@@ -78,11 +89,6 @@
         }
     }
 
-    function wrap(el, wrapper) {
-        el.parentNode.insertBefore(wrapper, el);
-        wrapper.appendChild(el);
-    }
-
     PixelatedPolyfill.initialized = false;
 
     PixelatedPolyfill.pixelate = (elements) => {
@@ -100,10 +106,6 @@
                 .pixelated-polyfill {
                     display: inline-block;
                     font-size: 0;
-                }
-                .pixelated-polyfill-inner {
-                    display: inline-block;
-                    position: relative;
                 }
             `;
 
