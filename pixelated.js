@@ -11,8 +11,9 @@
  */
 (function() {
     class PixelatedImage {
-        constructor(img) {
+        constructor(img, algo) {
             this.img = img;
+            this.algo = algo;
             this.originalImg = img.cloneNode(true);
             if (img.complete) {
                 this.init();
@@ -25,30 +26,40 @@
         }
 
         init() {
-            // First try native
-            
-            this.img.style.imageRendering = "pixelated";
-            
-            // Then, polyfill time
+            const onready = () => {
+                // First try native
+                                
+                if (this.algo !== "xbr") this.img.style.imageRendering = "pixelated";
+                                
+                // Then, polyfill time
 
-            if (!CSS.supports("image-rendering", "pixelated")) {
-                this.img.crossOrigin = "anonymous";
-                // Lock dimensions
-                if (!this.img.getAttribute("width") && !this.img.getAttribute("height")) {
-                    this.img.width = this.img.naturalWidth;
-                    this.img.height = this.img.naturalHeight;
+                if (!CSS.supports("image-rendering", "pixelated") || this.algo === "xbr") {
+                    this.img.crossOrigin = "anonymous";
+                    // Lock dimensions
+                    if (!this.img.getAttribute("width") && !this.img.getAttribute("height")) {
+                        this.img.width = this.img.naturalWidth;
+                        this.img.height = this.img.naturalHeight;
+                    }
+                    // Set up canvas
+                    this.canvas = document.createElement('canvas');
+                    this.ctx = this.canvas.getContext("2d");
+
+                    // Size the canvas and draw
+
+                    this.updateCanvas();
+
+                    // Listen for size changes
+
+                    new ResizeObserver(this.updateCanvas.bind(this)).observe(this.img);
                 }
-                // Set up canvas
-                this.canvas = document.createElement('canvas');
-                this.ctx = this.canvas.getContext("2d");
-
-                // Size the canvas and draw
-
-                this.updateCanvas();
-
-                // Listen for size changes
-
-                new ResizeObserver(this.updateCanvas.bind(this)).observe(this.img);
+            }
+            if (this.algo === "xbr") {
+                XbrWasm.ready.then(() => {
+                    this.xbr = new XbrWasm(this.img, 4);
+                    onready();
+                });
+            } else {
+                onready();
             }
         }
 
@@ -63,8 +74,17 @@
                 this.canvas.height = h;
                 // Redraw
                 this.ctx.save();
-                this.ctx.imageSmoothingEnabled = false;
-                this.ctx.drawImage(this.originalImg, 0, 0, this.canvas.width, this.canvas.height);
+
+                if (this.algo === "xbr") {
+                    this.ctx.imageSmoothingEnabled = true;
+                    this.xbr.draw();
+                    this.ctx.drawImage(this.xbr.destCanvas, 0, 0, this.canvas.width, this.canvas.height);
+                }
+                else {
+                    this.ctx.imageSmoothingEnabled = false;
+                    this.ctx.drawImage(this.originalImg, 0, 0, this.canvas.width, this.canvas.height);
+                }
+
                 this.ctx.restore();
                 // Draw canvas to img element
                 this.img.src = this.canvas.toDataURL();
@@ -81,7 +101,7 @@
 
     function processImage(img) {
         img.style.imageRendering = "pixelated";
-        new PixelatedImage(img);
+        new PixelatedImage(img, img.getAttribute("pixelated-algo"));
     }
 
     document.addEventListener("DOMContentLoaded", function() {

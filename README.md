@@ -12,7 +12,7 @@ Click on the screenshot to see a [live demo](https://www.maxlaumeister.com/softw
 
 <a href="https://www.maxlaumeister.com/software/pixelated-js/"><img alt="Pixelated.js Screenshot" src="/screenshot.png?raw=true" width="635" title="Click for Live Demo"></a>
 
-## Usage
+## Scaling With Nearest-Neighbor
 
 Start with one or more scaled-up `img` tags that you'd like to apply nearest-neighbor scaling to. Add the `pixelated` attribute:
 
@@ -30,12 +30,27 @@ That's it!
 
 `Pixelated.js` adds the `image-rendering: pixelated` property if the browser supports it, and if not, `Pixelated.js` polyfills it by automatically replacing the `src` of your image with a dynamically-generated scaled-up image.
 
+## Scaling With XBR
+
+`Pixelated.js` optionally supports background-threaded [xbr](https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms#xBR_family) pixel art scaling using [XbrWasm](https://www.maxlaumeister.com/xbr-wasm/), a proprietary library. To get this working, [grab a copy of XbrWasm](https://www.maxlaumeister.com/xbr-wasm/license/) and extract it into the same folder as `Pixelated.js`. Then, load it before `Pixelated.js` like this:
+
+```html
+<script src="XbrWasm.js"></script>
+<script src="pixelated.min.js"></script>
+```
+
+Then, on your images, specify the `xbr` algorithm like this:
+
+```html
+<img src="switch.png" style="width: 300px;" pixelated pixelated-algo="xbr">
+```
+
 ## Features
 
 * Designed for all modern browsers (but not IE). Tested in Chrome, Firefox, and Edge.
 * Responds gracefully to resize/reflow events, like a real `img` tag
 * Stays crisp on hidpi displays
-* Exclusive browser activism feature - seeing blurry pixel art gently reminds IE users that they need to start using a browser that doesn't butcher my code
+* Exclusive browser activism feature - seeing blurry pixel art gently reminds IE users that they need to start using a browser that doesn't butcher JavaScript
 
 ## Limitations
 
