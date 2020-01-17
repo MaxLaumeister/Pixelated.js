@@ -63,7 +63,7 @@
             }
         }
 
-        updateCanvas() {
+        async updateCanvas() {
             // Debounce
             if (!this.canvasDebounceTimeout) {
                 // Update canvas size
@@ -74,14 +74,13 @@
                 this.canvas.height = h;
                 // Redraw
                 this.ctx.save();
+                this.ctx.imageSmoothingEnabled = false;
 
                 if (this.algo === "xbr") {
-                    this.ctx.imageSmoothingEnabled = true;
-                    this.xbr.draw();
+                    await this.xbr.draw();
                     this.ctx.drawImage(this.xbr.destCanvas, 0, 0, this.canvas.width, this.canvas.height);
                 }
                 else {
-                    this.ctx.imageSmoothingEnabled = false;
                     this.ctx.drawImage(this.originalImg, 0, 0, this.canvas.width, this.canvas.height);
                 }
 
